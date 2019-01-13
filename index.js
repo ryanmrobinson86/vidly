@@ -13,4 +13,6 @@ require('./startup/db')();
 // Verify that configuration exists
 require('./startup/config')();
 
-app.listen(3000, () => logger.info(`listening on port 3000...`));
+const server = app.listen(3000, () => logger.info(`listening on port 3000...`));
+
+module.exports = server;

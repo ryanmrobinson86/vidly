@@ -1,7 +1,9 @@
+const validateObjectId = require('../middleware/validateObjectId');
 const router = require('express').Router();
 const Genre = require('../models/genre').Genre;
 const auth_mw = require('../middleware/auth');
 const admin_mw = require('../middleware/admin');
+const mongoose = require('mongoose');
 
 // CREATE
 router.post('/', auth_mw, async (req, res) => {
@@ -15,7 +17,7 @@ router.post('/', auth_mw, async (req, res) => {
 
     // Add it if it can be added.
     genre = new Genre({ name: req.body.name.toLowerCase().trim() });
-    genre.save();
+    await genre.save();
     
     // Send the new genre back to the user
     res.send(genre);
@@ -23,12 +25,11 @@ router.post('/', auth_mw, async (req, res) => {
 
 // READ
 router.get('/', async (req, res) => {
-    throw new Error('Something.');
     // Send the genres object to the user.
     res.send(await Genre.find().sort('name'));
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
     // Look up the genre with the given name, if it doesn't exist, return error.
     const genre = await Genre.findById(req.params.id);
     if(!genre) return res.status(404).send(`Genre with id ("${req.params.id.trim()}") does not exist.`);
@@ -38,7 +39,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', auth_mw, async (req, res) => {
+router.put('/:id', auth_mw, validateObjectId, async (req, res) => {
     // If the  body has a name, that doesn't already exist in the
     // data, continue, otherwise alert for error.
     let { error } = Genre.validate(req.body);
@@ -57,7 +58,7 @@ router.put('/:id', auth_mw, async (req, res) => {
 });
 
 // DELETE
-router.delete('/:id', auth_mw, admin_mw, async (req, res) => {
+router.delete('/:id', auth_mw, admin_mw, validateObjectId, async (req, res) => {
     // Look up the genre with the given name, if it doesn't exist, return error.
     const genre = await Genre.findOneAndDelete({_id: req.params.id});
     if(!genre) return res.status(404).send(`Genre ("${req.params.id.trim()}") does not exist.`);
