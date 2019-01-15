@@ -1,13 +1,10 @@
 const router = require('express').Router();
 const Customer = require('../models/customer').Customer;
 const auth_mw = require('../middleware/auth');
+const validation = require('../middleware/validation');
 
 // CREATE
-router.post('/', auth_mw, async (req, res) => {
-    // If the customer doesn't exisit, and the body is in the correct format, add it to the db.
-    const { error } = Customer.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message)
-
+router.post('/', auth_mw, validation(Customer.validate), async (req, res) => {
     // Verify that the customer doesn't already exist
     let customers = await Customer.search(req.body);
     if(customers.length) return res.status(302).send(customers);
@@ -42,12 +39,7 @@ router.get('/:id', auth_mw, async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', auth_mw, async (req, res) => {
-    // If the customer exists, and the body has a valid update contents, that doesn't already exist in the
-    // data, reassign the customer attributes.
-    const { error } = Customer.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message)
-
+router.put('/:id', auth_mw, validation(Customer.validate), async (req, res) => {
     // Search for an exisiting customer with the same data and prevent the update if the found customer
     // is not the customer being updated.
     const found = await Customer.search(req.body);

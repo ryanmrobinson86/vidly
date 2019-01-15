@@ -2,13 +2,10 @@ const router = require('express').Router();
 const Movie = require('../models/movie').Movie;
 const Genre = require('../models/genre').Genre;
 const auth_mw = require('../middleware/auth');
+const validation = require('../middleware/validation');
 
 // CREATE
-router.post('/', auth_mw, async (req, res) => {
-    // If the movie doesn't exisit, and the body is in the correct format, add it to the db.
-    const { error } = Movie.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message);
-
+router.post('/', auth_mw, validation(Movie.validate), async (req, res) => {
     // Verify that the movie doesn't already exist
     let movies = await Movie.search(body, true);
     if(movies.length) return res.status(302).send(movies);
@@ -46,12 +43,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', auth_mw, async (req, res) => {
-    // If the customer exists, and the body has a valid update contents, that doesn't already exist in the
-    // data, reassign the customer attributes.
-    const { error } = Movie.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message)
-
+router.put('/:id', auth_mw, validation(Movie.validate), async (req, res) => {
     // Search for an exisiting movie with the same data and prevent the update if the found movie
     // is not the movie being updated.
     const found = await Movie.search(req.body);

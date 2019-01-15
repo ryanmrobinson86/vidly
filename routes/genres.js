@@ -3,14 +3,11 @@ const router = require('express').Router();
 const Genre = require('../models/genre').Genre;
 const auth_mw = require('../middleware/auth');
 const admin_mw = require('../middleware/admin');
+const validation = require('../middleware/validation');
 const mongoose = require('mongoose');
 
 // CREATE
-router.post('/', auth_mw, async (req, res) => {
-    // If the genre doesn't exisit, and the body has a name, add it to the db.
-    const { error } = Genre.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message)
-
+router.post('/', auth_mw, validation(Genre.validate), async (req, res) => {
     // Verify that the genre doesn't already exist
     let genre = await Genre.findByName(req.body.name);
     if(genre) return res.status(302).send(genre);
@@ -39,12 +36,7 @@ router.get('/:id', validateObjectId, async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', auth_mw, validateObjectId, async (req, res) => {
-    // If the  body has a name, that doesn't already exist in the
-    // data, continue, otherwise alert for error.
-    let { error } = Genre.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message);
-
+router.put('/:id', auth_mw, validation(Genre.validate), validateObjectId, async (req, res) => {
     // If a genre with the new name already exists, alert the user.
     const found = await Genre.findByName(req.body.name);
     if(found && !found._id.toString().match(new RegExp(`${req.params.id.trim()}`, 'i'))) 

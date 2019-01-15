@@ -5,14 +5,12 @@ const {Customer} = require('../models/customer');
 const {Movie} = require('../models/movie');
 const {Rental} = require('../models/rental');
 const auth_mw = require('../middleware/auth');
+const validation = require('../middleware/validation');
 
 Fawn.init(mongoose);
 
 // Create a rental
-router.post('/', auth_mw, async (req, res) => {
-    const { error } = Rental.validate(req.body);
-    if(error) return res.status(400).send(error.message);
-
+router.post('/', auth_mw, validation(Rental.validate), async (req, res) => {
     const this_movie = await Movie.findById(req.body.movieId);
     if(!this_movie) return res.status(404).send(`Movie not found.`);
 

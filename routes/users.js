@@ -3,11 +3,9 @@ const User = require('../models/user').User;
 const _ = require('lodash');
 const bcrypt = require('bcrypt');
 const auth_mw = require('../middleware/auth');
+const validation = require('../middleware/validation');
 
-router.post('/', auth_mw, async (req, res) => {
-    const {error} = User.validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message);
-
+router.post('/', auth_mw, validation(User.validate), async (req, res) => {
     let user = await User.findOne({email: req.body.email});
     if(user) return res.status(400).send('User already exists');
 

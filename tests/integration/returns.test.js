@@ -4,6 +4,7 @@ const { Movie } = require('../../models/movie');
 const { Genre } = require('../../models/genre');
 const mongoose = require('mongoose');
 const request = require('supertest');
+const moment = require('moment');
 
 describe('/api/returns', () => {
     let server;
@@ -140,24 +141,31 @@ describe('/api/returns', () => {
         expect(found.numberInStock).toBe(inStock+1);
     });
 
-    // Return Finalized rental info if data valid
+    // Update dateReturned property if data valid
+    it('should assign dateReturned property', async () => {
+        await exec();
+        const found = await Rental.findById(rental._id);
+
+        expect(moment(found.dateReturned).diff(moment())).toBeLessThanOrEqual(10000);
+    });
+
+    // Calculate the correct rentalRate
+
+    // The Finalized rate should be the number of days * movie.dailyRentalRate
+    it('should calculate rentalFee correctly', async () => {
+        rental.dateOut = moment().subtract(7, 'days').toDate();
+        await rental.save();
+        await exec();
+        const found = await Rental.findById(rental._id);
+
+        expect(found.rentalFee).toBeCloseTo(7*rate);
+    });  
+
+    // Return Finalized rental in body if data valid
     it('should finalize rental info if data valid', async () => {
         const res = await exec();
 
         expect(res.body).toHaveProperty('movie._id', movieId);
         expect(res.body).toHaveProperty('customer._id', customerId);
-        expect(new Date(res.body.dateReturned).toDateString()).toMatch(new Date().toDateString());
-       expect(res.body.rentalFee).toBeCloseTo(rate);
     });
-
-    // The Finalized rate should be the number of days * movie.dailyRentalRate
-    it('should calculate rentalFee correctly', async () => {
-        rental.dateOut = new Date();
-        rental.dateOut.setDate(rental.dateOut.getDate()-5);
-        await rental.save();
-        await exec();
-        const found = await Rental.findById(rental._id);
-
-        expect(found.rentalFee).toBeCloseTo(6*rate);
-    });  
 });
