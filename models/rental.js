@@ -35,6 +35,7 @@ const rentalSchema = new mongoose.Schema({
     rentalFee: Number
 });
 
+<<<<<<< HEAD
 rentalSchema.methods.finalize = function(date) {
     this.dateReturned = date;
     const days = moment(this.dateReturned).diff(this.dateOut, 'days');
@@ -51,12 +52,17 @@ rentalSchema.statics.lookup = function(customerId, movieId) {
 const Rental = new mongoose.model('Rental', rentalSchema);
 
 Rental.validate = function (body) {
+=======
+rentalSchema.statics.validate = function (body) {
+>>>>>>> 9b08478d7aeac8b2e7a4a7d7446f1e82112bb9b9
     const schema = {
         movieId: Joi.objectId().required(),
         customerId: Joi.objectId().required()
     };
 
     return Joi.validate(body, schema);
-}
+};
+
+const Rental = new mongoose.model('Rental', rentalSchema);
 
 exports.Rental = Rental;

@@ -13,7 +13,7 @@ module.exports = winston.createLogger({
         ),
         transports: [
             new winston.transports.Console({colorize: true, prettyPrint: true}),
-            new winston.transports.File({filename: 'vidly.log'}),
+            //new winston.transports.File({filename: 'vidly.log'}),
             new winston.transports.MongoDB({
                 db: 'mongodb://localhost/vidly',
                 level: 'info',
@@ -24,7 +24,7 @@ module.exports = winston.createLogger({
         ],
         exceptionHandlers: [
             new winston.transports.Console({colorize: true, prettyPrint: true}),
-            new winston.transports.File({filename: 'vidly.log'}),
+            //new winston.transports.File({filename: 'vidly.log'}),
             new winston.transports.MongoDB({
                 db: 'mongodb://localhost/vidly',
                 level: 'error',

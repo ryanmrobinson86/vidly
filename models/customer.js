@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
 
-const Customer = mongoose.model('Customer', new mongoose.Schema({
+const customerSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -13,28 +13,17 @@ const Customer = mongoose.model('Customer', new mongoose.Schema({
     },
     email: {
         type: String,
-        trim: true
+        trim: true,
+        unique: true,
+        required: true
     },
     isGold: {
         type: Boolean,
         default: false
     }
-}));
+});
 
-Customer.validate = function (body) {
-    const schema = {
-        name:   Joi.string(),
-        phone:  Joi.string().regex(
-            /^((?:\+|00)[17](?: |\-)?|(?:\+|00)[1-9]\d{0,2}(?: |\-)?|(?:\+|00)1\-\d{3}(?: |\-)?)?(0\d|[ \(-\.\*]?[0-9]{3}[ \(-\.\*]?|[1-9]{0,3})(?:([ -\.\*]?[0-9]{2}){4}|((?:[0-9]{2}){4})|([ -\.\*]?[0-9]{3}[ -\.\*]?[0-9]{4})|([0-9]{7}))$/, 
-            'Valid Phone Number'),
-        email:  Joi.string().email(),
-        isGold: Joi.boolean()
-    };
-
-    return Joi.validate(body, schema, {convert: true});
-}
-
-Customer.search = async function (find) {
+customerSchema.statics.search = async function (find) {
    filters = {};
     if(find.name) {
         filters.name = {
@@ -58,9 +47,28 @@ Customer.search = async function (find) {
         filters.isGold = find.isGold;
     }
     
-    return await Customer
-            .find(filters)
-            .sort('name');
+    return await this.find(filters).sort('name');
 }
+
+customerSchema.statics.findByEmail = async function(email) {
+    return await this.findOne({email});
+}
+
+customerSchema.statics.validate = function (body) {
+    const schema = {
+        name:   Joi.string(),
+        phone:  Joi.string().regex(
+            /^((?:\+|00)[17](?: |\-)?|(?:\+|00)[1-9]\d{0,2}(?: |\-)?|(?:\+|00)1\-\d{3}(?: |\-)?)?(0\d|[ \(-\.\*]?[0-9]{3}[ \(-\.\*]?|[1-9]{0,3})(?:([ -\.\*]?[0-9]{2}){4}|((?:[0-9]{2}){4})|([ -\.\*]?[0-9]{3}[ -\.\*]?[0-9]{4})|([0-9]{7}))$/, 
+            'Valid Phone Number'),
+        email:  Joi.string().email(),
+        isGold: Joi.boolean()
+    };
+
+    return Joi.validate(body, schema, {convert: true});
+}
+
+const Customer = mongoose.model('Customer', customerSchema);
+
+
 
 exports.Customer = Customer;
