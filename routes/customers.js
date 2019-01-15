@@ -44,7 +44,6 @@ router.put('/:id', auth_mw, validation(Customer.validate), async (req, res) => {
     // Search for an exisiting customer with the same data and prevent the update if the found customer
     // is not the customer being updated.
     let customer = await Customer.findByEmail(req.body.email);
-    console.log(customer);
     if(customer && !customer._id.toString().match(new RegExp(req.params.id, 'i'))) return res.status(409).send(`There is already a matching customer with the data:\n${req.body}\n\n Nothing has been modified.`);
    
     // Look up the customer with the given id, if it doesn't exist, return error.

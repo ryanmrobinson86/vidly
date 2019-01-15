@@ -42,7 +42,8 @@ userSchema.statics.validate = function (ob) {
     const schema = {
         name: Joi.string(),
         email: Joi.string().email(),
-        password: Joi.string()
+        password: Joi.string(),
+        isAdmin: Joi.boolean()
     }
 
     return Joi.validate(ob, schema);

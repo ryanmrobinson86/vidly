@@ -1,14 +1,15 @@
 const router = require('express').Router();
-const User = require('../models/user').User;
+const {User} = require('../models/user');
 const _ = require('lodash');
 const auth_mw = require('../middleware/auth');
+const admin_mw = require('../middleware/admin');
 const validation = require('../middleware/validation');
 
-router.post('/', auth_mw, validation(User.validate), async (req, res) => {
+router.post('/', auth_mw, admin_mw, validation(User.validate), async (req, res) => {
     let user = await User.findOne({email: req.body.email});
-    if(user) return res.status(400).send('User already exists');
+    if(user) return res.status(409).send('User with provided email already exists');
 
-    user = new User(_.pick(req.body, ['name', 'email', 'password']));
+    user = new User(_.pick(req.body, ['name', 'email', 'password', 'isAdmin']));
 
     await user.hashPassword();
     await user.save();
