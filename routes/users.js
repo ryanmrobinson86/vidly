@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const User = require('../models/user').User;
 const _ = require('lodash');
-const bcrypt = require('bcrypt');
 const auth_mw = require('../middleware/auth');
 const validation = require('../middleware/validation');
 
@@ -11,7 +10,7 @@ router.post('/', auth_mw, validation(User.validate), async (req, res) => {
 
     user = new User(_.pick(req.body, ['name', 'email', 'password']));
 
-    user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
+    await user.hashPassword();
     await user.save();
 
     const tok = user.generateAuthToken();

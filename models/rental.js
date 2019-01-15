@@ -34,15 +34,15 @@ const rentalSchema = new mongoose.Schema({
     rentalFee: Number
 });
 
-const Rental = new mongoose.model('Rental', rentalSchema);
-
-Rental.validate = function (body) {
+rentalSchema.statics.validate = function (body) {
     const schema = {
         movieId: Joi.objectId().required(),
         customerId: Joi.objectId().required()
     };
 
     return Joi.validate(body, schema);
-}
+};
+
+const Rental = new mongoose.model('Rental', rentalSchema);
 
 exports.Rental = Rental;

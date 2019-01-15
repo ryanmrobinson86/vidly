@@ -7,18 +7,15 @@ const genreSchema = new mongoose.Schema({
         required: true,
         trim: true
     }
-})
+});
 
-const Genre = mongoose.model('Genre', genreSchema);
+genreSchema.statics.findByName = async function (name) {
+    return await this.findOne({
+        name: {$regex: name.trim(), $options: 'i'}
+    });
+};
 
-Genre.findByName = async function (name) {
-    if(name) {
-        return await Genre
-            .findOne({name: {$regex: name.trim(), $options: 'i'}});
-    }
-}
-
-Genre.validate = function (name) {
+genreSchema.statics.validate = function (name) {
     const schema = {
         name: Joi.string(),
         id: Joi.objectId()
@@ -26,6 +23,8 @@ Genre.validate = function (name) {
 
     return Joi.validate(name, schema);
 }
+
+const Genre = mongoose.model('Genre', genreSchema);
 
 exports.Genre = Genre;
 exports.genreSchema = genreSchema;
