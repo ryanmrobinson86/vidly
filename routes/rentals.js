@@ -46,7 +46,7 @@ router.post('/', auth_mw, validation(Rental.validate), async (req, res) => {
 router.get('/', auth_mw, async (req, res) => {
     const rentals = await Rental.find().sort('-startDate');
 
-    return res.status(rentals?200:204).send(rentals);
+    return res.status(rentals.length?200:204).send(rentals);
 
 });
 
@@ -55,7 +55,7 @@ router.get('/:id', auth_mw, async (req, res) => {
     const rental = await Rental.findById(req.params.id);
     if(!rental) return res.status(404).send('Rental not found');
 
-    return res.status(rental?200:204).send(rental);
+    return res.status(200).send(rental);
 
 });
 

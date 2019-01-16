@@ -152,8 +152,16 @@ describe(endpoint, () => {
 
         // Should return a status of 200 if client is logged in.
         it('should return a status of 200 if client is logged in', async () => {
+            await Customer.insertMany(existingCustomers);
+
             const res = await exec();
             expect(res.status).toBe(200);
+        });
+
+        // Should return a status of 204 if no customers in list.
+        it('should return a status of 204 if there are no customers', async () => {
+            const res = await exec();
+            expect(res.status).toBe(204);
         });
 
         // Should return a list of all customers

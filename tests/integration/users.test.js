@@ -103,4 +103,52 @@ describe(endpoint, () => {
             expect(decoded).toBeTruthy();
         });
     });
+
+    describe('GET /me', () => {
+        const exec = () => {
+            return request(server)
+                .get('/api/users/me')
+                .set('x-auth-token', token);
+        };
+
+        beforeEach(async () => {
+            const user = new User({name: 'a', email: 'a@a', password: '12345'})
+            await user.save();
+            token = user.generateAuthToken();
+        });
+
+        it('should return 401 if there is no user logged in.', async () => {
+            token = '';
+            
+            const res = await exec();
+
+            expect(res.status).toBe(401);
+        });
+
+        it('should return 200 if there is a user logged in.', async () => {
+            const res = await exec();
+
+            expect(res.status).toBe(200);
+        });
+
+        it('should return the current user in the body if there is a user logged in.', async () => {
+            const res = await exec();
+
+            expect(res.body).toEqual(
+                expect.objectContaining({
+                    name: 'a'
+                })
+            );
+        });
+
+        it('should not return the current user\'s password', async () => {
+            const res = await exec();
+
+            expect(res.body).toEqual(
+                expect.not.objectContaining({
+                    password: expect.anything()
+                })
+            );
+        });
+    });
 });
