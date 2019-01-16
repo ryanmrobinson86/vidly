@@ -16,7 +16,7 @@ const movieSchema = new mongoose.Schema({
     },
     numberInStock: {
         type: Number,
-        required: true
+        default: 0
     },
     dailyRentalRate: {
         type: Number,
@@ -24,9 +24,7 @@ const movieSchema = new mongoose.Schema({
     }
 });
 
-const Movie = mongoose.model('Movie', movieSchema);
-
-Movie.validate = function (body) {
+movieSchema.statics.validate = function (body) {
     const schema = {
         title:   Joi.string(),
         genreId:  Joi.objectId(),
@@ -38,9 +36,9 @@ Movie.validate = function (body) {
     return Joi.validate(body, schema, {convert: true});
 }
 
-Movie.search = async function (find, exact) {
+movieSchema.methods.search = async function (find, exact) {
     try {
-        let query = Movie.find();
+        let query = this.find();
 
         if(find.title && !exact)
             query = query.find({
@@ -101,11 +99,13 @@ Movie.search = async function (find, exact) {
             });
         }
 
-        return await Movie.find(query).sort('title');
+        return await this.find(query).sort('title');
     }
     catch (err) {
         console.error('Error with findMovies: ', err);
     }
 }
+
+const Movie = mongoose.model('Movie', movieSchema);
 
 exports.Movie = Movie;
