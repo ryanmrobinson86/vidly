@@ -6,8 +6,7 @@ const request = require('supertest');
 const endpoint = '/api/movies'
 
 describe(endpoint, () => {
-    let server;
-
+    let server; 
     beforeEach(() => { server = require('../../index');});
     afterEach(async () => {
         await server.close();
