@@ -69,7 +69,7 @@ describe(endpoint, () => {
         });
 
         it('should return 400 if the dailyRentalRate is invalid', async () => {
-            body.dailyRentalRate = undefined;
+            body.dailyRentalRate = 0;
 
             const res = await exec();
 
@@ -90,6 +90,44 @@ describe(endpoint, () => {
             const res = await exec();
 
             expect(res.status).toBe(409);
+        });
+
+        it('should return 409 if the movie already exists (by Genre Name)', async () => {
+            const movie = new Movie({
+                title: 'a',
+                genre: {
+                    _id: genreId,
+                    name: 'a'
+                },
+                dailyRentalRate: 0.1
+            });
+            await movie.save();
+            body.genreId = undefined;
+            body.genreName = 'a';
+
+            const res = await exec();
+
+            expect(res.status).toBe(409);
+        });
+
+        it('should return 200 if the body is valid', async () => {
+            const res = await exec();
+
+            expect(res.status).toBe(200);
+        });
+
+        it('should add the new movie if the body is valid', async () => {
+            await exec();
+
+            const found = await Movie.findOne({title: body.title, 'genre._id': genreId});
+
+            expect(found).toHaveProperty('title', body.title);
+        });
+
+        it('should return the new movie in the response body if the body is valid', async () => {
+            const res = await exec();
+
+            expect(res.body).toHaveProperty('title', body.title);
         });
     });
 });

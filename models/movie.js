@@ -37,18 +37,18 @@ movieSchema.statics.validate = function (body) {
     return Joi.validate(body, schema, {convert: true});
 }
 
-movieSchema.statics.findByTitleAndGenre = function (title, genreId, genreName) {
+movieSchema.statics.findByTitleAndGenre = async function (title, genreId, genreName) {
     if(!title || (!genreId && !genreName)) return null
 
     let genre;
     if(genreId) {
-        genre = Genre.findById(genreId);
+        genre = await Genre.findById(genreId);
     }
     else {
-        genre = Genre.findOne({name: genreName});
+        genre = await Genre.findOne({name: genreName});
     }
-
-    return Genre.findOne({title, 'genre._id': genre._id});
+    
+    return this.findOne({title, 'genre._id': genre._id});
 };
 
 movieSchema.statics.search = async function (find, exact) {

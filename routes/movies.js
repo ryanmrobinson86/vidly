@@ -23,10 +23,7 @@ router.post('/', auth_mw, validation(Movie.validate), async (req, res) => {
     // Add it if it can be added.
     const new_movie = await new Movie({
         title: req.body.title.trim(), 
-        genre: req.body.genreId?
-            (await Genre.findById(req.body.genreId.trim())):
-            req.body.genreName?(await Genre.findByName(req.body.genreName.trim())):
-                undefined, 
+        genre: genre, 
         numberInStock: req.body.numberInStock, 
         dailyRentalRate: req.body.dailyRentalRate
     });
