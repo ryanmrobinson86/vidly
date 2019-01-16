@@ -2,6 +2,7 @@ const {Movie} = require('../../models/movie');
 const {User} = require('../../models/user');
 const {Genre} = require('../../models/genre');
 const request = require('supertest');
+const mongoose = require('mongoose');
 
 const endpoint = '/api/movies'
 
@@ -11,11 +12,13 @@ describe(endpoint, () => {
     afterEach(async () => {
         await server.close();
         await Movie.deleteMany({});
+        await Genre.deleteMany({});
     });
 
     describe('POST /', () => {
         let token;
         let body;
+        let genreId;
 
         const exec = () => {
             return request(server)
@@ -26,44 +29,67 @@ describe(endpoint, () => {
 
         beforeEach(() => {
             token = new User().generateAuthToken();
+            genreId = mongoose.Types.ObjectId().toHexString();
+            const genre = new Genre({
+                _id: genreId,
+                name: 'a'
+            });
+            genre.save();
             body = {
                 title: 'a',
-                genre: new Genre({name: 'a'}),
+                genreId: genreId,
                 numberInStock: 10,
                 dailyRentalRate: 0.1
             };
         });
 
-        it('should return 401 if the client isnt logged in', () => {
+        it('should return 401 if the client isnt logged in', async () => {
             token = '';
 
-            const res = exec();
+            const res = await exec();
 
             expect(res.status).toBe(401);
         });
 
-        it('should return 400 if the title is invalid', () => {
+        it('should return 400 if the title is invalid', async () => {
             body.title = '';
 
-            const res = exec();
+            const res = await exec();
 
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(400);
         });
 
-        it('should return 400 if the genre is invalid', () => {
-            body.Genre = undefined;
+        it('should return 400 if the genre is invalid', async () => {
+            body.genreId = '';
+            body.genreName = '';
 
-            const res = exec();
+            const res = await exec();
 
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(400);
         });
 
-        it('should return 400 if the dailyRentalRate is invalid', () => {
+        it('should return 400 if the dailyRentalRate is invalid', async () => {
             body.dailyRentalRate = undefined;
 
-            const res = exec();
+            const res = await exec();
 
-            expect(res.status).toBe(401);
+            expect(res.status).toBe(400);
+        });
+
+        it('should return 409 if the movie already exists', async () => {
+            const movie = new Movie({
+                title: 'a',
+                genre: {
+                    _id: genreId,
+                    name: 'a'
+                },
+                dailyRentalRate: 0.1
+            });
+            await movie.save();
+
+            const res = await exec();
+
+            expect(res.status).toBe(409);
         });
     });
 });

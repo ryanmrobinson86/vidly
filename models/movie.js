@@ -1,6 +1,6 @@
 const Joi = require('joi');
 const mongoose = require('mongoose');
-const {genreSchema} = require("./genre");
+const {genreSchema, Genre} = require("./genre");
 
 const movieSchema = new mongoose.Schema({
     title: {
@@ -20,6 +20,7 @@ const movieSchema = new mongoose.Schema({
     },
     dailyRentalRate: {
         type: Number,
+        min: 0,
         required: true
     }
 });
@@ -30,80 +31,89 @@ movieSchema.statics.validate = function (body) {
         genreId:  Joi.objectId(),
         genreName: Joi.string(),
         numberInStock: Joi.number(),
-        dailyRentalRate: Joi.number()
+        dailyRentalRate: Joi.number().min(0.01)
     };
 
     return Joi.validate(body, schema, {convert: true});
 }
 
-movieSchema.methods.search = async function (find, exact) {
-    try {
-        let query = this.find();
+movieSchema.statics.findByTitleAndGenre = function (title, genreId, genreName) {
+    if(!title || (!genreId && !genreName)) return null
 
-        if(find.title && !exact)
-            query = query.find({
-                title: {
-                    $regex: find.title.trim(),
-                    $options: 'i'
-                }
-            });
-        else if(find.title) {
-            query = query.find({
-                title: {
-                    $regex: `^${find.title.trim()}$`,
-                    $options: 'i'
-                }
-            });
-        }
-        if(find.genre && !exact)
-            query = query.find({
-                'genre.name': {
-                    $regex: find.genre.trim(),
-                    $options: 'i'
-                }
-            });
-        else if (find.genre) {
-            query = query.find({
-                'genre.name': {
-                    $regex: `^${find.genre.trim()}$`,
-                    $options: 'i'
-                }
-            });
-        }
-        if(find.numberInStockMin) {
-            query = query.find({
-                numberInStock: {
-                    $gte: find.numberInStockMin
-                }
-            });
-        }
-        if(find.numberInStockMax) {
-            query = query.find({
-                numberInStock: {
-                    $lte: find.numberInStockMax
-                }
-            });
-        }
-        if(find.dailyRentalRateMin) {
-            query = query.find({
-                dailyRentalRate: {
-                    $gte: find.dailyRentalRateMin
-                }
-            });
-        }
-        if(find.dailyRentalRateMax) {
-            query = query.find({
-                dailyRentalRate: {
-                    $lte: find.dailyRentalRateMax
-                }
-            });
-        }
+    let genre;
+    if(genreId) {
+        genre = Genre.findById(genreId);
+    }
+    else {
+        genre = Genre.findOne({name: genreName});
+    }
 
-        return await this.find(query).sort('title');
-    }
-    catch (err) {
-        console.error('Error with findMovies: ', err);
-    }
+    return Genre.findOne({title, 'genre._id': genre._id});
+};
+
+movieSchema.statics.search = async function (find, exact) {
+    // let query = this.find();
+
+    // if(find.title && !exact)
+    //     query = query.find({
+    //         title: {
+    //             $regex: find.title.trim(),
+    //             $options: 'i'
+    //         }
+    //     });
+    // else if(find.title) {
+    //     query = query.find({
+    //         title: {
+    //             $regex: `^${find.title.trim()}$`,
+    //             $options: 'i'
+    //         }
+    //     });
+    // }
+    // if(find.genre && !exact)
+    //     query = query.find({
+    //         'genre.name': {
+    //             $regex: find.genre.trim(),
+    //             $options: 'i'
+    //         }
+    //     });
+    // else if (find.genre) {
+    //     query = query.find({
+    //         'genre.name': {
+    //             $regex: `^${find.genre.trim()}$`,
+    //             $options: 'i'
+    //         }
+    //     });
+    // }
+    // if(find.numberInStockMin) {
+    //     query = query.find({
+    //         numberInStock: {
+    //             $gte: find.numberInStockMin
+    //         }
+    //     });
+    // }
+    // if(find.numberInStockMax) {
+    //     query = query.find({
+    //         numberInStock: {
+    //             $lte: find.numberInStockMax
+    //         }
+    //     });
+    // }
+    // if(find.dailyRentalRateMin) {
+    //     query = query.find({
+    //         dailyRentalRate: {
+    //             $gte: find.dailyRentalRateMin
+    //         }
+    //     });
+    // }
+    // if(find.dailyRentalRateMax) {
+    //     query = query.find({
+    //         dailyRentalRate: {
+    //             $lte: find.dailyRentalRateMax
+    //         }
+    //     });
+    // }
+
+    return await this.find().sort('title');
 }
 
 const Movie = mongoose.model('Movie', movieSchema);

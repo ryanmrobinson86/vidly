@@ -7,8 +7,18 @@ const validation = require('../middleware/validation');
 // CREATE
 router.post('/', auth_mw, validation(Movie.validate), async (req, res) => {
     // Verify that the movie doesn't already exist
-    let movies = await Movie.search(body, true);
-    if(movies.length) return res.status(302).send(movies);
+    let movie = await Movie.findByTitleAndGenre(req.body.title, req.body.genreId, req.body.genreName);
+    if(movie) return res.status(409).send(movie);
+
+    let genre;
+    // Verify that the genre is valid
+    if(req.body.genreId) {
+        genre = await Genre.findById(req.body.genreId.trim());
+    }
+    else if(req.body.genreName) {
+        genre = await Genre.findByName(req.body.genreName.trim());
+    }
+    else return res.status(400).send('Genre is required');
     
     // Add it if it can be added.
     const new_movie = await new Movie({
