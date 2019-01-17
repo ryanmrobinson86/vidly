@@ -27,7 +27,6 @@ router.post('/', auth_mw, validation(Customer.validate), async (req, res) => {
 router.get('/', auth_mw, async (req, res) => {
     let customers = await Customer.search(req.body);
 
-    console.log(customers);
     return res.status(customers.length?200:204).send(customers);
 });
 
