@@ -6,6 +6,8 @@ const logger = require('./middleware/logging');
 require('./startup/exceptions')();
 // Configure the Joi validation package.
 require('./startup/validation')();
+// Setup the production middleware.
+require('./startup/prod')(app);
 // Setup the routes.
 require('./startup/routes')(app);
 // Initialize db connections.
