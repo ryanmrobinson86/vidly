@@ -7,7 +7,7 @@ const myFormat = winston.format.printf(info => {
     return `${info.timestamp} ${info.level}: ${info.message}`;
 });
 
-const db = config.get('db');
+const dbname = config.get('db')
 
 module.exports = winston.createLogger({
         format: winston.format.combine(
@@ -18,7 +18,7 @@ module.exports = winston.createLogger({
             new winston.transports.Console({colorize: true, prettyPrint: true}),
             new winston.transports.File({filename: 'vidly.log'}),
             new winston.transports.MongoDB({
-                db: db,
+                db: dbname,
                 level: 'info',
                 options: {
                     useNewUrlParser: true
@@ -29,7 +29,7 @@ module.exports = winston.createLogger({
             new winston.transports.Console({colorize: true, prettyPrint: true}),
             new winston.transports.File({filename: 'vidly.log'}),
             new winston.transports.MongoDB({
-                db: db,
+                db: dbname,
                 level: 'error',
                 options: {
                     useNewUrlParser: true
