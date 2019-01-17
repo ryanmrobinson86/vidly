@@ -16,24 +16,24 @@ module.exports = winston.createLogger({
         ),
         transports: [
             new winston.transports.Console({colorize: true, prettyPrint: true}),
-            new winston.transports.File({filename: 'vidly.log'}),
-            new winston.transports.MongoDB({
-                db: dbname,
-                level: 'info',
-                options: {
-                    useNewUrlParser: true
-                }
-            })
+            new winston.transports.File({filename: 'vidly.log'})
+            // new winston.transports.MongoDB({
+            //     db: dbname,
+            //     level: 'info',
+            //     options: {
+            //         useNewUrlParser: true
+            //     }
+            // })
         ],
         exceptionHandlers: [
             new winston.transports.Console({colorize: true, prettyPrint: true}),
-            new winston.transports.File({filename: 'vidly.log'}),
-            new winston.transports.MongoDB({
-                db: dbname,
-                level: 'error',
-                options: {
-                    useNewUrlParser: true
-                }
-            })
+            new winston.transports.File({filename: 'vidly.log'})
+            // new winston.transports.MongoDB({
+            //     db: dbname,
+            //     level: 'error',
+            //     options: {
+            //         useNewUrlParser: true
+            //     }
+            // })
         ]
     })
